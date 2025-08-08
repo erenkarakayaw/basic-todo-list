@@ -37,8 +37,12 @@ app.get('/add', (req,res) => {
 
     if (!db.isOpen) db.open() 
 
-    db.exec(`INSERT INTO TODOS (TODO, ISCOMPLETED) 
-        VALUES (${todo}, 0)`)
+    try {
+        db.prepare("INSERT INTO TODOS (TODO, ISCOMPLETED) VALUES (?, ?)").
+        run(todo, 0)
+    } catch (err) {
+            console.log(err)
+    }
 
     db.close()
 
@@ -55,6 +59,21 @@ app.get('/update', (req,res) => {
 
     db.exec(
         `UPDATE TODOS SET ISCOMPLETED=${isCompleted} WHERE TODO_ID = ${todo}`
+    );       
+
+    db.close()
+
+    res.status(200)
+    res.send()
+})
+
+app.get('/delete', (req,res) => {
+    const todoid = req.query.todoid
+    
+    if (!db.isOpen) db.open() 
+
+    db.exec(
+        `DELETE FROM TODOS WHERE TODO_ID=${todoid}`
     );       
 
     db.close()

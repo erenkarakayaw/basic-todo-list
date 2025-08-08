@@ -6,7 +6,14 @@ import spinner from "./assets/tube-spinner.svg";
 function App() {
     const [Todos, setTodos] = useState([]);
 
-    useEffect(() => {
+    const [todoInput, settodoInput] = useState("");
+    const [loading, setLoading] = useState(true);
+
+    
+    useEffect(() => {getTodo()},[])
+
+    function getTodo() {
+        setLoading(true);
         fetch("http://localhost:3000/get/")
             .then((res) => {
                 if (res.ok) return res.json();
@@ -14,15 +21,15 @@ function App() {
             .then((data) => {
                 setTodos(data.datas);
             })
-            .catch((err) => console.log(err))
+            .catch((err) => {
+                console.log(err)
+            })
             .finally(() => setLoading(false));
-    }, []);
-
-    const [todoInput, settodoInput] = useState("");
-    const [loading, setLoading] = useState(true);
+    }
 
     function updateTodo(index) {
-        let temp = [...Todos];
+        console.log(NextIDGuess())
+        let temp = [...Todos];        
         temp[index].isCompleted = !temp[index].isCompleted;
         setTodos(temp);
 
@@ -43,22 +50,13 @@ function App() {
     }
 
     function deleteTodo(index) {
-        setTodos(Todos.filter((dat, ind) => ind != index));
-    }
+        let _id = Todos.find((dat, ind) => ind === index);
+        let datas = Todos.filter((dat, ind) => ind != index);
 
-    function addTodo() {
-        const text = todoInput.toString();
-        console.log(text)
-        if (todoInput.length > 0)
-        {
-            setTodos((prev) => [...prev, { todo: todoInput, isCompleted: false }]);
-            settodoInput("");
-        }
-        
+        setTodos(datas);
+        console.log(_id);
         setLoading(true);
-        fetch(
-            `http://localhost:3000/add?todo=${text}`
-        )
+        fetch(`http://localhost:3000/delete?todoid=${_id.todoID}`)
             .then((res) => {
                 if (res.ok) return res.json();
             })
@@ -66,8 +64,37 @@ function App() {
             .catch((err) => {})
             .finally(() => {
                 setLoading(false);
-            });  
-                  
+            });
+    }
+
+    function NextIDGuess() : Number {
+        let temp = Todos.map((val) => val.todoID)
+        temp.sort();
+        temp.reverse();
+
+        return temp[0]+1
+    }
+    
+
+    function addTodo() {
+        const text = todoInput.toString();
+        if (todoInput.length > 0) {            
+            setTodos([...Todos, {todoID: NextIDGuess(), todo: text, isCompleted: false}])
+
+            setLoading(true);
+            fetch(`http://localhost:3000/add?todo=${text}`)
+                .then((res) => {
+                    if (res.ok) return res.json();
+                })
+                .then((dat) => {})
+                .catch((err) => {})
+                .finally(() => {                                        
+                    setLoading(false);           
+                });
+            settodoInput("");
+        }
+
+        getTodo()
     }
 
     return (
