@@ -1,12 +1,12 @@
-import './App.css'
+import "./App.css";
 
-function App() {
-
-  return (
-    <>
-      <p>assd</p>        
-    </>
-  )
+function App() {   
+    
+    return (
+        <>
+            <p>{datas.name}</p>
+        </>
+    );
 }
 
-export default App
+export default App;
